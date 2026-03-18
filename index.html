@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Tiny Home Review Console</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f5f3ee;
+    --panel:#ffffff;
+    --panel-soft:#faf8f3;
+    --ink:#1f2328;
+    --muted:#6b7280;
+    --line:#e6e2da;
+    --accent:#4a5e4a;
+    --accent-2:#dfe8dd;
+    --good:#15803d;
+    --good-bg:#eef8f0;
+    --mid:#b45309;
+    --mid-bg:#fff7ea;
+    --bad:#b91c1c;
+    --bad-bg:#fff1f1;
+    --blue:#305a7a;
+    --blue-bg:#eaf3f9;
+    --shadow:0 14px 36px rgba(31,35,40,.06);
+    --radius:18px;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family:"DM Sans",system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+    background:linear-gradient(180deg,#f8f6f2 0%, #f3f0ea 100%);
+    color:var(--ink);
+  }
+  .shell{
+    width:min(1600px, 100%);
+    margin:0;
+    padding:20px;
+  }
+  .topbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    margin-bottom:16px;
+  }
+  .brand{display:flex;align-items:center;gap:12px}
+  .logo{
+    width:40px;height:40px;border-radius:12px;background:var(--accent);
+  }
+  h1{margin:0;font-size:22px}
+  .sub{font-size:13px;color:var(--muted)}
+  .hidden{display:none !important}
+  .panel{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+  }
+  .pad{padding:18px}
+  .login{
+    max-width:560px;
+  }
+  .row{display:flex;gap:10px;align-items:center}
+  .row.wrap{flex-wrap:wrap}
+  .main{
+    display:grid;
+    grid-template-columns:320px minmax(0,1fr) 440px;
+    gap:18px;
+    align-items:start;
+  }
+  .sticky{position:sticky;top:18px}
+  input,select,button,textarea{
+    font:inherit;
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:11px 13px;
+    background:#fff;
+    color:var(--ink);
+  }
+  textarea{width:100%;min-height:86px;resize:vertical}
+  button{cursor:pointer}
+  button.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
+  button.secondary{background:#fff;border-color:var(--line);color:var(--ink);font-weight:600}
+  button.ghost{background:transparent}
+  .sectionTitle{margin:0 0 10px 0;font-size:15px;font-weight:700}
+  .note{font-size:12px;color:var(--muted)}
+  .divider{height:1px;background:var(--line);margin:14px 0}
+  .hero{
+    display:flex;justify-content:space-between;align-items:flex-start;gap:18px;
+    padding:20px 22px;margin-bottom:18px;
+  }
+  .hero h2{margin:0 0 6px 0;font-size:24px}
+  .heroMeta{font-size:14px;color:var(--muted)}
+  .pill{
+    display:inline-flex;align-items:center;gap:6px;
+    border-radius:999px;padding:6px 12px;font-size:12px;font-weight:700;
+    border:1px solid var(--line);background:#fff;color:var(--muted);
+  }
+  .pill.good{color:var(--good);background:var(--good-bg);border-color:#cee6d4}
+  .pill.mid{color:var(--mid);background:var(--mid-bg);border-color:#ead7b0}
+  .pill.bad{color:var(--bad);background:var(--bad-bg);border-color:#efc8c8}
+  .pill.blue{color:var(--blue);background:var(--blue-bg);border-color:#d4e2ef}
+  .stack{display:flex;flex-direction:column;gap:16px}
+  .statGrid{
+    display:grid;
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:10px;
+  }
+  .stat{
+    background:var(--panel-soft);
+    border:1px solid var(--line);
+    border-radius:16px;
+    padding:14px;
+  }
+  .stat strong{display:block;font-size:26px;line-height:1;margin-bottom:6px}
+  .stat span{font-size:12px;color:var(--muted)}
+  .list{display:flex;flex-direction:column;gap:10px}
+  .groupCard,.studentCard,.summaryCard,.miniCard{
+    border:1px solid var(--line);
+    border-radius:16px;
+    background:#fff;
+    padding:14px;
+  }
+  .groupCard.active{border-color:#c8d8c7;background:#f8fbf7}
+  .groupCard .title,.studentCard .title,.summaryCard .title,.miniCard .title{
+    font-weight:700;font-size:15px;
+  }
+  .meta{font-size:12px;color:var(--muted);margin-top:4px}
+  .scoreRow{
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:10px;
+  }
+  .scoreRow.two{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+  .scoreField label{
+    display:block;
+    font-size:12px;
+    color:var(--muted);
+    margin-bottom:6px;
+  }
+  .studentHeader{
+    display:flex;justify-content:space-between;align-items:flex-start;gap:10px;
+  }
+  .tagRow{
+    display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;
+  }
+  .tag{
+    font-size:12px;
+    border:1px solid var(--line);
+    border-radius:999px;
+    padding:5px 10px;
+    background:#fff;
+    color:var(--muted);
+  }
+  .activityTable{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:10px;
+    font-size:13px;
+  }
+  .activityTable th,.activityTable td{
+    border-bottom:1px solid var(--line);
+    text-align:left;
+    padding:8px 6px;
+    vertical-align:top;
+  }
+  .activityTable th{color:var(--muted);font-weight:700;font-size:12px}
+  .saveRow{
+    display:flex;justify-content:flex-end;gap:10px;align-items:center;margin-top:12px;
+  }
+  .statusText{font-size:12px;color:var(--muted)}
+  .score4{background:var(--good-bg);color:var(--good);border-color:#cee6d4}
+  .score3,.score2{background:var(--mid-bg);color:var(--mid);border-color:#ead7b0}
+  .score1,.score0{background:var(--bad-bg);color:var(--bad);border-color:#efc8c8}
+  .filterBox select,.filterBox input{width:100%}
+  .empty{
+    padding:18px;border:1px dashed var(--line);border-radius:16px;color:var(--muted);font-size:13px;background:var(--panel-soft)
+  }
+  @media(max-width:1350px){
+    .main{grid-template-columns:1fr}
+    .sticky{position:static}
+  }
+  @media(max-width:900px){
+    .statGrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .scoreRow,.scoreRow.two{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="topbar">
+    <div class="brand">
+      <div class="logo"></div>
+      <div>
+        <h1>Tiny Home Review Console</h1>
+        <div class="sub" id="subtitle">Admin review and grading tool</div>
+      </div>
+    </div>
+    <button id="btnLogout" class="ghost hidden">Log out</button>
+  </div>
+
+  <div id="viewLogin" class="panel pad login">
+    <div class="sectionTitle">Admin login</div>
+    <div class="note">Use the same admin code from your tracker settings.</div>
+    <div class="row" style="margin-top:12px">
+      <input id="loginCode" placeholder="Enter admin code" style="flex:1;max-width:320px" />
+      <button id="btnLogin" class="primary">Login</button>
+    </div>
+    <div id="loginError" class="note" style="color:var(--bad);margin-top:10px"></div>
+  </div>
+
+  <div id="viewApp" class="hidden">
+    <div class="panel hero">
+      <div>
+        <h2>Project review and scoring</h2>
+        <div class="heroMeta" id="heroMeta">Review each group, then score students and the final project.</div>
+      </div>
+      <div class="row wrap">
+        <span class="pill blue" id="projectKeyPill">tiny_home_2026_s1</span>
+        <span class="pill" id="dayPill">Day —</span>
+      </div>
+    </div>
+
+    <div class="main">
+      <!-- LEFT -->
+      <div class="stack sticky">
+        <div class="panel pad">
+          <div class="sectionTitle">Filters</div>
+          <div class="filterBox stack">
+            <div>
+              <label class="note">Project key</label>
+              <input id="projectKeyInput" value="tiny_home_2026_s1" />
+            </div>
+            <div>
+              <label class="note">Class</label>
+              <select id="classFilter"></select>
+            </div>
+            <div>
+              <label class="note">Group</label>
+              <select id="groupFilter"></select>
+            </div>
+            <div>
+              <label class="note">Search student</label>
+              <input id="studentSearch" placeholder="Type a student name" />
+            </div>
+            <div class="row wrap">
+              <button id="btnRefresh" class="primary">Refresh</button>
+              <button id="btnReloadScores" class="secondary">Reload saved scores</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel pad">
+          <div class="sectionTitle">Groups in class</div>
+          <div id="groupList" class="list"></div>
+        </div>
+      </div>
+
+      <!-- CENTER -->
+      <div class="stack">
+        <div class="panel pad">
+          <div class="sectionTitle">Group summary</div>
+          <div id="groupSummaryMeta" class="note">Choose a group.</div>
+          <div class="statGrid" style="margin-top:12px">
+            <div class="stat"><strong id="gsMembers">0</strong><span>students in group</span></div>
+            <div class="stat"><strong id="gsClaimed">0</strong><span>roles claimed</span></div>
+            <div class="stat"><strong id="gsDone">0</strong><span>roles checked done</span></div>
+            <div class="stat"><strong id="gsDays">0</strong><span>active student-days</span></div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="statGrid">
+            <div class="stat"><strong id="gsTaskReady">0</strong><span>tasks marked ready</span></div>
+            <div class="stat"><strong id="gsTaskOK">0</strong><span>tasks checked OK</span></div>
+            <div class="stat"><strong id="gsTaskFix">0</strong><span>tasks marked fix</span></div>
+            <div class="stat"><strong id="gsCompletion">0%</strong><span>role completion rate</span></div>
+          </div>
+        </div>
+
+        <div class="panel pad">
+          <div class="sectionTitle">Group evidence</div>
+          <div id="groupEvidence" class="list"></div>
+        </div>
+
+        <div class="panel pad">
+          <div class="sectionTitle">Group project review</div>
+          <div class="scoreRow two">
+            <div class="scoreField">
+              <label>Uniformity</label>
+              <select id="groupUniformity">
+                <option value="">—</option><option>4</option><option>3</option><option>2</option><option>1</option><option>0</option>
+              </select>
+            </div>
+            <div class="scoreField">
+              <label>Neatness</label>
+              <select id="groupNeatness">
+                <option value="">—</option><option>4</option><option>3</option><option>2</option><option>1</option><option>0</option>
+              </select>
+            </div>
+            <div class="scoreField">
+              <label>Completion</label>
+              <select id="groupCompletion">
+                <option value="">—</option><option>4</option><option>3</option><option>2</option><option>1</option><option>0</option>
+              </select>
+            </div>
+            <div class="scoreField">
+              <label>Collaboration</label>
+              <select id="groupCollaboration">
+                <option value="">—</option><option>4</option><option>3</option><option>2</option><option>1</option><option>0</option>
+              </select>
+            </div>
+            <div class="scoreField">
+              <label>Final group score</label>
+              <select id="groupFinal">
+                <option value="">—</option><option>4</option><option>3</option><option>2</option><option>1</option><option>0</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="margin-top:12px">
+            <label class="note">Group comment</label>
+            <textarea id="groupComment" placeholder="Overall comment on the group project, teamwork, neatness, timing, etc."></textarea>
+          </div>
+
+          <div class="saveRow">
+            <span id="groupSaveStatus" class="statusText"></span>
+            <button id="btnSaveGroupReview" class="primary">Save group review</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT -->
+      <div class="stack">
+        <div class="panel pad">
+          <div class="sectionTitle">Student reviews</div>
+          <div class="note">These scores are teacher-decided. Website activity is evidence only.</div>
+          <div id="studentCards" class="stack" style="margin-top:12px"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const supabaseUrl = "https://trtwmxdtedqltjvzqdvu.supabase.co";
+const supabaseKey = "sb_publishable_lx05g_WplECsjYdAKQRsTw_nAnx0_IP";
+
+const sb = supabase.createClient(supabaseUrl, supabaseKey, {
+  auth: {
+    persistSession: false,
+    autoRefreshToken: false,
+    detectSessionInUrl: false,
+  },
+  global: {
+    headers: {
+      apikey: supabaseKey,
+      Authorization: `Bearer ${supabaseKey}`,
+    },
+  },
+});
+
+const DEFAULT_PROJECT_KEY = "tiny_home_2026_s1";
+
+let state = {
+  adminCode: null,
+  settings: {},
+  currentDayNo: 1,
+  calendar: [],
+  groups: [],
+  students: [],
+  items: [],
+  selectedClass: "ALL",
+  selectedGroupId: null,
+  projectKey: DEFAULT_PROJECT_KEY,
+
+  // evidence caches
+  dailyAssignments: [],
+  roleChecks: [],
+  taskStatus: [],
+  projectRoles: [],
+  projectFlags: [],
+  studentReviews: [],
+  groupReviews: [],
+};
+
+function qs(id){ return document.getElementById(id); }
+
+function setSubtitle(text){
+  qs("subtitle").textContent = text;
+}
+
+function safeNum(v){
+  const n = Number(v);
+  return Number.isFinite(n) ? n : 0;
+}
+
+function stageName(stage){
+  return Number(stage) === 0 ? "No project day" : `Stage ${stage}`;
+}
+
+function englishName(full){
+  const s = String(full || "");
+  const m = s.match(/\(([^)]+)\)/);
+  if (m) return m[1].trim();
+  return s.split(" ")[0].trim();
+}
+
+function unique(arr){
+  return [...new Set(arr)];
+}
+
+function scoreClass(v){
+  if (v === "" || v === null || v === undefined) return "";
+  const n = Number(v);
+  if (n >= 4) return "score4";
+  if (n >= 2) return "score3";
+  return "score1";
+}
+
+async function loadSettings(){
+  const { data, error } = await sb.from("settings").select("Key,Value");
+  if (error) throw error;
+  const out = {};
+  (data || []).forEach(r => out[String(r.Key)] = r.Value);
+  state.settings = out;
+  state.currentDayNo = safeNum(out.CURRENT_DAYNO || 1);
+}
+
+async function loadCalendar(){
+  const { data, error } = await sb.from("calendar").select("*").order("DayNo", { ascending:true });
+  if (error) throw error;
+  state.calendar = data || [];
+}
+
+async function loadGroups(){
+  const { data, error } = await sb.from("groups").select("*").order("Class", { ascending:true }).order("GroupID", { ascending:true });
+  if (error) throw error;
+  state.groups = data || [];
+}
+
+async function loadStudents(){
+  const { data, error } = await sb.from("students").select("*").eq("Active", true).order("Class", { ascending:true }).order("GroupID", { ascending:true }).order("Name", { ascending:true });
+  if (error) throw error;
+  state.students = data || [];
+}
+
+async function loadItems(){
+  const { data, error } = await sb.from("items").select("*").eq("Active", true).order("Order", { ascending:true }).order("Title", { ascending:true });
+  if (error) throw error;
+  state.items = data || [];
+}
+
+async function loadEvidenceData(){
+  const [
+    assignmentsRes,
+    checksRes,
+    taskRes,
+    projectRolesRes,
+    flagsRes,
+    studentReviewsRes,
+    groupReviewsRes
+  ] = await Promise.all([
+    sb.from("dailyassignments").select("*"),
+    sb.from("rolechecks").select("*"),
+    sb.from("taskstatus").select("*"),
+    sb.from("project_group_roles").select("*"),
+    sb.from("project_group_ruleflags").select("*"),
+    sb.from("project_student_reviews").select("*").eq("projectkey", state.projectKey),
+    sb.from("project_group_reviews").select("*").eq("projectkey", state.projectKey),
+  ]);
+
+  if (assignmentsRes.error) throw assignmentsRes.error;
+  if (checksRes.error) throw checksRes.error;
+  if (taskRes.error) throw taskRes.error;
+  if (projectRolesRes.error) throw projectRolesRes.error;
+  if (flagsRes.error) throw flagsRes.error;
+  if (studentReviewsRes.error) throw studentReviewsRes.error;
+  if (groupReviewsRes.error) throw groupReviewsRes.error;
+
+  state.dailyAssignments = assignmentsRes.data || [];
+  state.roleChecks = checksRes.data || [];
+  state.taskStatus = taskRes.data || [];
+  state.projectRoles = projectRolesRes.data || [];
+  state.projectFlags = flagsRes.data || [];
+  state.studentReviews = studentReviewsRes.data || [];
+  state.groupReviews = groupReviewsRes.data || [];
+}
+
+function getGroupStudents(groupId){
+  return state.students.filter(s => Number(s.GroupID) === Number(groupId));
+}
+
+function getStudentAssignments(studentId){
+  return state.dailyAssignments.filter(r => Number(r.StudentID) === Number(studentId));
+}
+
+function getStudentChecks(studentId){
+  return state.roleChecks.filter(r => Number(r.StudentID) === Number(studentId));
+}
+
+function getGroupAssignments(groupId){
+  const ids = getGroupStudents(groupId).map(s => Number(s.StudentID));
+  return state.dailyAssignments.filter(r => ids.includes(Number(r.StudentID)));
+}
+
+function getGroupChecks(groupId){
+  const ids = getGroupStudents(groupId).map(s => Number(s.StudentID));
+  return state.roleChecks.filter(r => ids.includes(Number(r.StudentID)));
+}
+
+function getGroupTasks(groupId){
+  return state.taskStatus.filter(r => Number(r.GroupID) === Number(groupId));
+}
+
+function getRoleTitle(roleId){
+  const item = state.items.find(x => String(x.ItemID) === String(roleId));
+  return item ? item.Title : String(roleId);
+}
+
+function getRolePoints(roleId){
+  const item = state.items.find(x => String(x.ItemID) === String(roleId));
+  return item ? safeNum(item.Points || 0) : 0;
+}
+
+function getStudentReview(studentId){
+  return state.studentReviews.find(r =>
+    Number(r.studentid) === Number(studentId) &&
+    String(r.projectkey) === String(state.projectKey)
+  ) || null;
+}
+
+function getGroupReview(groupId){
+  return state.groupReviews.find(r =>
+    Number(r.groupid) === Number(groupId) &&
+    String(r.projectkey) === String(state.projectKey)
+  ) || null;
+}
+
+function summarizeStudent(student){
+  const assignments = getStudentAssignments(student.StudentID);
+  const checks = getStudentChecks(student.StudentID);
+
+  const doneMap = {};
+  checks.forEach(c => {
+    const key = `${c.DayNo}__${c.RoleID}`;
+    doneMap[key] = c;
+  });
+
+  const rolesClaimed = assignments.length;
+  const rolesDone = assignments.filter(a => {
+    const key = `${a.DayNo}__${a.RoleID}`;
+    return !!doneMap[key]?.Done;
+  }).length;
+
+  const earnedPoints = assignments.reduce((sum, a) => {
+    const key = `${a.DayNo}__${a.RoleID}`;
+    return sum + (doneMap[key]?.Done ? getRolePoints(a.RoleID) : 0);
+  }, 0);
+
+  const daysClaimed = unique(assignments.map(a => Number(a.DayNo))).length;
+  const daysDone = unique(
+    assignments.filter(a => {
+      const key = `${a.DayNo}__${a.RoleID}`;
+      return !!doneMap[key]?.Done;
+    }).map(a => Number(a.DayNo))
+  ).length;
+
+  const completionRate = rolesClaimed ? Math.round((rolesDone / rolesClaimed) * 100) : 0;
+
+  const notes = checks
+    .filter(c => String(c.Note || "").trim())
+    .sort((a,b) => new Date(b.UpdatedAt || 0) - new Date(a.UpdatedAt || 0))
+    .slice(0, 5);
+
+  const roleCounts = {};
+  assignments.forEach(a => {
+    const rid = String(a.RoleID);
+    roleCounts[rid] = (roleCounts[rid] || 0) + 1;
+  });
+
+  const topRoles = Object.entries(roleCounts)
+    .sort((a,b) => b[1] - a[1])
+    .slice(0, 3)
+    .map(([rid,count]) => `${getRoleTitle(rid)} (${count})`);
+
+  return {
+    rolesClaimed,
+    rolesDone,
+    earnedPoints,
+    daysClaimed,
+    daysDone,
+    completionRate,
+    notes,
+    topRoles
+  };
+}
+
+function summarizeGroup(groupId){
+  const students = getGroupStudents(groupId);
+  const assignments = getGroupAssignments(groupId);
+  const checks = getGroupChecks(groupId);
+  const tasks = getGroupTasks(groupId);
+
+  const doneMap = {};
+  checks.forEach(c => {
+    const key = `${c.DayNo}__${c.StudentID}__${c.RoleID}`;
+    doneMap[key] = c;
+  });
+
+  const rolesClaimed = assignments.length;
+  const rolesDone = assignments.filter(a => {
+    const key = `${a.DayNo}__${a.StudentID}__${a.RoleID}`;
+    return !!doneMap[key]?.Done;
+  }).length;
+
+  const activeStudentDays = unique(assignments.map(a => `${a.StudentID}__${a.DayNo}`)).length;
+  const completionRate = rolesClaimed ? Math.round((rolesDone / rolesClaimed) * 100) : 0;
+
+  const taskReady = tasks.filter(t => String(t.Status) === "READY").length;
+  const taskOK = tasks.filter(t => String(t.Status) === "OK").length;
+  const taskFix = tasks.filter(t => String(t.Status) === "FIX").length;
+
+  const projectRoles = state.projectRoles.filter(r => Number(r.groupid) === Number(groupId));
+  const flags = state.projectFlags.filter(r => Number(r.groupid) === Number(groupId) && !!r.needsreminder);
+
+  return {
+    students,
+    rolesClaimed,
+    rolesDone,
+    activeStudentDays,
+    completionRate,
+    taskReady,
+    taskOK,
+    taskFix,
+    projectRoles,
+    flags
+  };
+}
+
+function populateClassFilter(){
+  const sel = qs("classFilter");
+  const classes = ["ALL", ...unique(state.groups.map(g => String(g.Class || ""))).filter(Boolean)];
+  sel.innerHTML = "";
+  classes.forEach(c => {
+    const opt = document.createElement("option");
+    opt.value = c;
+    opt.textContent = c === "ALL" ? "All classes" : c;
+    sel.appendChild(opt);
+  });
+  sel.value = state.selectedClass;
+}
+
+function populateGroupFilter(){
+  const sel = qs("groupFilter");
+  const filteredGroups = state.groups.filter(g =>
+    state.selectedClass === "ALL" || String(g.Class) === String(state.selectedClass)
+  );
+
+  sel.innerHTML = "";
+  filteredGroups.forEach(g => {
+    const opt = document.createElement("option");
+    opt.value = g.GroupID;
+    opt.textContent = `${g.Class} • ${g.GroupName}`;
+    sel.appendChild(opt);
+  });
+
+  if (!filteredGroups.length){
+    state.selectedGroupId = null;
+    return;
+  }
+
+  const stillExists = filteredGroups.some(g => Number(g.GroupID) === Number(state.selectedGroupId));
+  if (!stillExists) state.selectedGroupId = filteredGroups[0].GroupID;
+  sel.value = String(state.selectedGroupId);
+}
+
+function renderGroupList(){
+  const wrap = qs("groupList");
+  wrap.innerHTML = "";
+
+  const filteredGroups = state.groups.filter(g =>
+    state.selectedClass === "ALL" || String(g.Class) === String(state.selectedClass)
+  );
+
+  if (!filteredGroups.length){
+    wrap.innerHTML = `<div class="empty">No groups found.</div>`;
+    return;
+  }
+
+  filteredGroups.forEach(g => {
+    const sum = summarizeGroup(g.GroupID);
+    const card = document.createElement("div");
+    card.className = "groupCard" + (Number(g.GroupID) === Number(state.selectedGroupId) ? " active" : "");
+    card.style.cursor = "pointer";
+    card.innerHTML = `
+      <div class="title">${g.GroupName}</div>
+      <div class="meta">${g.Class} • Claimed ${sum.rolesClaimed} • Done ${sum.rolesDone} • Active days ${sum.activeStudentDays}</div>
+    `;
+    card.onclick = () => {
+      state.selectedGroupId = g.GroupID;
+      qs("groupFilter").value = String(g.GroupID);
+      renderAll();
+    };
+    wrap.appendChild(card);
+  });
+}
+
+function renderGroupSummary(){
+  const groupId = state.selectedGroupId;
+  const group = state.groups.find(g => Number(g.GroupID) === Number(groupId));
+  const meta = qs("groupSummaryMeta");
+  const evidenceWrap = qs("groupEvidence");
+
+  if (!group){
+    meta.textContent = "Choose a group.";
+    evidenceWrap.innerHTML = `<div class="empty">No group selected.</div>`;
+    return;
+  }
+
+  const sum = summarizeGroup(groupId);
+
+  meta.textContent = `${group.Class} • ${group.GroupName}`;
+
+  qs("gsMembers").textContent = sum.students.length;
+  qs("gsClaimed").textContent = sum.rolesClaimed;
+  qs("gsDone").textContent = sum.rolesDone;
+  qs("gsDays").textContent = sum.activeStudentDays;
+  qs("gsTaskReady").textContent = sum.taskReady;
+  qs("gsTaskOK").textContent = sum.taskOK;
+  qs("gsTaskFix").textContent = sum.taskFix;
+  qs("gsCompletion").textContent = `${sum.completionRate}%`;
+
+  evidenceWrap.innerHTML = "";
+
+  const a = document.createElement("div");
+  a.className = "summaryCard";
+  a.innerHTML = `<div class="title">Project contribution roles</div>`;
+  if (!sum.projectRoles.length){
+    a.innerHTML += `<div class="meta">No project contribution roles recorded.</div>`;
+  } else {
+    const tbl = document.createElement("table");
+    tbl.className = "activityTable";
+    tbl.innerHTML = `<thead><tr><th>Role</th><th>Students</th></tr></thead>`;
+    const tbody = document.createElement("tbody");
+    sum.projectRoles.forEach(r => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<td>${String(r.rolekey).replaceAll("_"," ")}</td><td>${r.studentnames || "—"}</td>`;
+      tbody.appendChild(tr);
+    });
+    tbl.appendChild(tbody);
+    a.appendChild(tbl);
+  }
+  evidenceWrap.appendChild(a);
+
+  const b = document.createElement("div");
+  b.className = "summaryCard";
+  b.innerHTML = `<div class="title">Reminder flags</div>`;
+  if (!sum.flags.length){
+    b.innerHTML += `<div class="meta">No special reminder flags stored for this group.</div>`;
+  } else {
+    const tbl = document.createElement("table");
+    tbl.className = "activityTable";
+    tbl.innerHTML = `<thead><tr><th>Rule</th><th>Note</th></tr></thead>`;
+    const tbody = document.createElement("tbody");
+    sum.flags.forEach(r => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<td>${String(r.rulekey).replaceAll("_"," ")}</td><td>${r.note || ""}</td>`;
+      tbody.appendChild(tr);
+    });
+    tbl.appendChild(tbody);
+    b.appendChild(tbl);
+  }
+  evidenceWrap.appendChild(b);
+
+  const c = document.createElement("div");
+  c.className = "summaryCard";
+  c.innerHTML = `<div class="title">Student activity snapshot</div>`;
+  const tbl = document.createElement("table");
+  tbl.className = "activityTable";
+  tbl.innerHTML = `<thead><tr><th>Student</th><th>Claimed</th><th>Done</th><th>Points</th><th>Days active</th></tr></thead>`;
+  const tbody = document.createElement("tbody");
+  sum.students.forEach(st => {
+    const ss = summarizeStudent(st);
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${st.Name}</td>
+      <td>${ss.rolesClaimed}</td>
+      <td>${ss.rolesDone}</td>
+      <td>${ss.earnedPoints}</td>
+      <td>${ss.daysClaimed}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+  tbl.appendChild(tbody);
+  c.appendChild(tbl);
+  evidenceWrap.appendChild(c);
+}
+
+function renderGroupReviewForm(){
+  const groupId = state.selectedGroupId;
+  const review = getGroupReview(groupId);
+
+  qs("groupUniformity").value = review?.uniformity_score ?? "";
+  qs("groupNeatness").value = review?.neatness_score ?? "";
+  qs("groupCompletion").value = review?.completion_score ?? "";
+  qs("groupCollaboration").value = review?.collaboration_score ?? "";
+  qs("groupFinal").value = review?.final_group_score ?? "";
+  qs("groupComment").value = review?.group_comment ?? "";
+  qs("groupSaveStatus").textContent = review ? `Last saved: ${new Date(review.updated_at).toLocaleString()}` : "";
+}
+
+function renderStudentCards(){
+  const wrap = qs("studentCards");
+  wrap.innerHTML = "";
+
+  const groupId = state.selectedGroupId;
+  const group = state.groups.find(g => Number(g.GroupID) === Number(groupId));
+  if (!group){
+    wrap.innerHTML = `<div class="empty">Choose a group first.</div>`;
+    return;
+  }
+
+  const search = String(qs("studentSearch").value || "").trim().toLowerCase();
+  let students = getGroupStudents(groupId);
+
+  if (search){
+    students = students.filter(s => String(s.Name || "").toLowerCase().includes(search));
+  }
+
+  if (!students.length){
+    wrap.innerHTML = `<div class="empty">No students match that filter.</div>`;
+    return;
+  }
+
+  students.forEach(st => {
+    const sum = summarizeStudent(st);
+    const review = getStudentReview(st.StudentID);
+
+    const card = document.createElement("div");
+    card.className = "studentCard";
+    card.dataset.studentId = st.StudentID;
+
+    const notesHtml = sum.notes.length
+      ? sum.notes.map(n => `<div class="miniCard"><div class="title">Day ${n.DayNo}</div><div class="meta">${n.Note || ""}</div></div>`).join("")
+      : `<div class="empty">No saved student notes.</div>`;
+
+    card.innerHTML = `
+      <div class="studentHeader">
+        <div>
+          <div class="title">${st.Name}</div>
+          <div class="meta">${st.Class} • ID ${st.StudentID}</div>
+        </div>
+        <span class="pill ${scoreClass(review?.final_competency_score || "")}">${review?.final_competency_score ?? "—"} final</span>
+      </div>
+
+      <div class="tagRow">
+        <span class="tag">Claimed: ${sum.rolesClaimed}</span>
+        <span class="tag">Done: ${sum.rolesDone}</span>
+        <span class="tag">Points: ${sum.earnedPoints}</span>
+        <span class="tag">Days active: ${sum.daysClaimed}</span>
+        <span class="tag">Completion: ${sum.completionRate}%</span>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="meta">Most frequent roles</div>
+      <div style="margin-top:6px">${sum.topRoles.length ? sum.topRoles.join(" • ") : "No role pattern yet"}</div>
+
+      <div class="divider"></div>
+
+      <div class="meta">Recent saved notes</div>
+      <div class="stack" style="margin-top:10px">${notesHtml}</div>
+
+      <div class="divider"></div>
+
+      <div class="scoreRow">
+        <div class="scoreField">
+          <label>Responsibility</label>
+          <select class="studentScore responsibility">
+            <option value="">—</option><option>4</option><option>3</option><option>2</option><option>1</option><option>0</option>
+          </select>
+        </div>
+        <div class="scoreField">
+          <label>Teamwork</label>
+          <select class="studentScore teamwork">
+            <option value="">—</option><option>4</option><option>3</option><option>2</option><option>1</option><option>0</option>
+          </select>
+        </div>
+        <div class="scoreField">
+          <label>Rules</label>
+          <select class="studentScore rules">
+            <option value="">—</option><option>4</option><option>3</option><option>2</option><option>1</option><option>0</option>
+          </select>
+        </div>
+        <div class="scoreField">
+          <label>Class time</label>
+          <select class="studentScore class_time">
+            <option value="">—</option><option>4</option><option>3</option><option>2</option><option>1</option><option>0</option>
+          </select>
+        </div>
+        <div class="scoreField">
+          <label>Project quality</label>
+          <select class="studentScore project_quality">
+            <option value="">—</option><option>4</option><option>3</option><option>2</option><option>1</option><option>0</option>
+          </select>
+        </div>
+        <div class="scoreField">
+          <label>Final competency</label>
+          <select class="studentScore final_competency">
+            <option value="">—</option><option>4</option><option>3</option><option>2</option><option>1</option><option>0</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="margin-top:12px">
+        <label class="note">Teacher comment</label>
+        <textarea class="studentComment" placeholder="Your judgment on this student's contribution, effort, responsibility, teamwork, and final performance."></textarea>
+      </div>
+
+      <div class="saveRow">
+        <span class="statusText saveStatus"></span>
+        <button class="primary btnSaveStudent">Save student review</button>
+      </div>
+    `;
+
+    card.querySelector(".responsibility").value = review?.responsibility_score ?? "";
+    card.querySelector(".teamwork").value = review?.teamwork_score ?? "";
+    card.querySelector(".rules").value = review?.rules_score ?? "";
+    card.querySelector(".class_time").value = review?.class_time_score ?? "";
+    card.querySelector(".project_quality").value = review?.project_quality_score ?? "";
+    card.querySelector(".final_competency").value = review?.final_competency_score ?? "";
+    card.querySelector(".studentComment").value = review?.teacher_comment ?? "";
+    card.querySelector(".saveStatus").textContent = review ? `Last saved: ${new Date(review.updated_at).toLocaleString()}` : "";
+
+    card.querySelector(".btnSaveStudent").onclick = async () => {
+      await saveStudentReview(st, card);
+    };
+
+    wrap.appendChild(card);
+  });
+}
+
+async function saveStudentReview(student, card){
+  const payload = {
+    studentid: Number(student.StudentID),
+    groupid: Number(student.GroupID),
+    projectkey: String(state.projectKey),
+    teacher_comment: String(card.querySelector(".studentComment").value || ""),
+    responsibility_score: card.querySelector(".responsibility").value === "" ? null : Number(card.querySelector(".responsibility").value),
+    teamwork_score: card.querySelector(".teamwork").value === "" ? null : Number(card.querySelector(".teamwork").value),
+    rules_score: card.querySelector(".rules").value === "" ? null : Number(card.querySelector(".rules").value),
+    class_time_score: card.querySelector(".class_time").value === "" ? null : Number(card.querySelector(".class_time").value),
+    project_quality_score: card.querySelector(".project_quality").value === "" ? null : Number(card.querySelector(".project_quality").value),
+    final_competency_score: card.querySelector(".final_competency").value === "" ? null : Number(card.querySelector(".final_competency").value),
+    updated_at: new Date().toISOString(),
+  };
+
+  const status = card.querySelector(".saveStatus");
+  status.textContent = "Saving...";
+
+  const { error } = await sb
+    .from("project_student_reviews")
+    .upsert(payload, { onConflict: "studentid,projectkey", ignoreDuplicates: false });
+
+  if (error){
+    console.log(error);
+    status.textContent = "Save failed";
+    return;
+  }
+
+  await reloadSavedReviews();
+  status.textContent = "Saved";
+  renderStudentCards();
+}
+
+async function saveGroupReview(){
+  const groupId = state.selectedGroupId;
+  if (!groupId) return;
+
+  const payload = {
+    groupid: Number(groupId),
+    projectkey: String(state.projectKey),
+    group_comment: String(qs("groupComment").value || ""),
+    uniformity_score: qs("groupUniformity").value === "" ? null : Number(qs("groupUniformity").value),
+    neatness_score: qs("groupNeatness").value === "" ? null : Number(qs("groupNeatness").value),
+    completion_score: qs("groupCompletion").value === "" ? null : Number(qs("groupCompletion").value),
+    collaboration_score: qs("groupCollaboration").value === "" ? null : Number(qs("groupCollaboration").value),
+    final_group_score: qs("groupFinal").value === "" ? null : Number(qs("groupFinal").value),
+    updated_at: new Date().toISOString(),
+  };
+
+  qs("groupSaveStatus").textContent = "Saving...";
+
+  const { error } = await sb
+    .from("project_group_reviews")
+    .upsert(payload, { onConflict: "groupid,projectkey", ignoreDuplicates: false });
+
+  if (error){
+    console.log(error);
+    qs("groupSaveStatus").textContent = "Save failed";
+    return;
+  }
+
+  await reloadSavedReviews();
+  qs("groupSaveStatus").textContent = "Saved";
+  renderGroupReviewForm();
+}
+
+async function reloadSavedReviews(){
+  const [studentReviewsRes, groupReviewsRes] = await Promise.all([
+    sb.from("project_student_reviews").select("*").eq("projectkey", state.projectKey),
+    sb.from("project_group_reviews").select("*").eq("projectkey", state.projectKey),
+  ]);
+
+  if (studentReviewsRes.error) throw studentReviewsRes.error;
+  if (groupReviewsRes.error) throw groupReviewsRes.error;
+
+  state.studentReviews = studentReviewsRes.data || [];
+  state.groupReviews = groupReviewsRes.data || [];
+}
+
+function renderAll(){
+  const dayObj = state.calendar.find(d => Number(d.DayNo) === Number(state.currentDayNo));
+  qs("projectKeyPill").textContent = state.projectKey;
+  qs("dayPill").textContent = dayObj ? `${dayObj.Label} • ${stageName(dayObj.Stage)}` : `Day ${state.currentDayNo}`;
+
+  populateClassFilter();
+  populateGroupFilter();
+  renderGroupList();
+  renderGroupSummary();
+  renderGroupReviewForm();
+  renderStudentCards();
+}
+
+async function login(){
+  const code = String(qs("loginCode").value || "").trim();
+  qs("loginError").textContent = "";
+  if (!code){
+    qs("loginError").textContent = "Enter admin code";
+    return;
+  }
+
+  try{
+    await loadSettings();
+
+    const adminCode = String(state.settings.ADMIN_CODE || "");
+    if (code !== adminCode){
+      qs("loginError").textContent = "Invalid admin code";
+      return;
+    }
+
+    state.adminCode = code;
+    state.projectKey = qs("projectKeyInput").value.trim() || DEFAULT_PROJECT_KEY;
+
+    await Promise.all([
+      loadCalendar(),
+      loadGroups(),
+      loadStudents(),
+      loadItems(),
+    ]);
+
+    await loadEvidenceData();
+
+    state.selectedClass = "ALL";
+    state.selectedGroupId = state.groups[0]?.GroupID || null;
+
+    showApp(true);
+    renderAll();
+    setSubtitle("Admin review mode");
+  } catch(e){
+    console.log(e);
+    qs("loginError").textContent = "Login failed";
+  }
+}
+
+function showApp(yes){
+  qs("viewLogin").classList.toggle("hidden", yes);
+  qs("viewApp").classList.toggle("hidden", !yes);
+  qs("btnLogout").classList.toggle("hidden", !yes);
+}
+
+function logout(){
+  state.adminCode = null;
+  showApp(false);
+  setSubtitle("Admin review and grading tool");
+  qs("loginCode").value = "";
+}
+
+qs("btnLogin").addEventListener("click", login);
+qs("btnLogout").addEventListener("click", logout);
+qs("loginCode").addEventListener("keydown", (e) => {
+  if (e.key === "Enter") login();
+});
+
+qs("classFilter").addEventListener("change", () => {
+  state.selectedClass = qs("classFilter").value;
+  populateGroupFilter();
+  renderAll();
+});
+
+qs("groupFilter").addEventListener("change", () => {
+  state.selectedGroupId = Number(qs("groupFilter").value);
+  renderAll();
+});
+
+qs("studentSearch").addEventListener("input", () => {
+  renderStudentCards();
+});
+
+qs("btnRefresh").addEventListener("click", async () => {
+  state.projectKey = qs("projectKeyInput").value.trim() || DEFAULT_PROJECT_KEY;
+  await loadEvidenceData();
+  renderAll();
+});
+
+qs("btnReloadScores").addEventListener("click", async () => {
+  state.projectKey = qs("projectKeyInput").value.trim() || DEFAULT_PROJECT_KEY;
+  await reloadSavedReviews();
+  renderAll();
+});
+
+qs("btnSaveGroupReview").addEventListener("click", saveGroupReview);
+</script>
+</body>
+</html>
